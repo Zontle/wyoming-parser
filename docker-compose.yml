@@ -1,0 +1,52 @@
+version: "2.3"
+services:
+  db:
+    image: postgres:11
+    mem_limit: 1536MB
+    mem_reservation: 1G
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password 
+    ports:
+    - "5442:5432"
+    networks:
+    - db_network
+    volumes:
+    - db-data:/var/lib/postgresql/data
+    - ./data:/home/data
+    - ./bin:/home/bin  
+  graphql-engine:
+    image: hasura/graphql-engine:v1.3.2
+    ports:
+    - "8080:8080"
+    networks:
+    - db_network
+    depends_on:
+    - "db"
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@db:5432/postgres
+      ## enable the console served by server
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+      ## enable debugging mode. It is recommended to disable this in production
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      ## uncomment next line to set an admin secret
+      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+  pgadmin4:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@zontle.tech
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+    - "8889:80"
+    networks:
+    - db_network
+    volumes:
+    - ./storage:/var/lib/pgadmin/storage
+networks:
+  db_network:
+    driver: bridge
+ 
+volumes:
+  db-data:

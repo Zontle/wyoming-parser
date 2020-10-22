@@ -1,0 +1,11 @@
+# Testing data folder
+backup
+
+# All exports from WY DB
+*.csv
+
+# Vim files
+*.swp
+
+# Schema file
+schema.pdf
